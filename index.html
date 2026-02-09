@@ -3,93 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>A Question for You ❤️</title>
+    <title>A Special Question ❤️</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         
         body {
             height: 100vh;
+            width: 100vw;
             display: flex;
             flex-direction: column;
-            /* Pushes card to bottom so face is visible */
-            justify-content: flex-end; 
+            justify-content: flex-end; /* Pushes content to bottom */
             align-items: center;
             font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            overflow: hidden;
             
-            /* BACKGROUND SETTINGS */
-            /* Gradient darkens bottom so text is readable */
-            background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.8) 80%), url('first-date.jpg');
-            background-size: cover;
-            background-position: center top; /* Focuses on faces at top */
+            /* --- DEFAULT BACKGROUND (DESKTOP) --- */
+            background-color: #1a0b0f; /* Dark romantic fallback */
+            background-image: url('first-date.jpg');
+            background-position: center center;
             background-repeat: no-repeat;
-            color: white;
-            overflow: hidden; /* Prevents scrollbars when buttons move */
-            padding-bottom: 40px; 
+            background-size: cover; /* Desktop: Fill the screen */
+        }
+
+        /* --- MOBILE OPTIMIZATION --- */
+        @media (max-width: 768px) {
+            body {
+                /* On Mobile: Fit the image width exactly at the top */
+                background-size: 100% auto; 
+                background-position: top center;
+                /* Add a gradient so the photo fades into the dark background */
+                background-image: linear-gradient(to bottom, rgba(0,0,0,0) 60%, #1a0b0f 90%), url('first-date.jpg');
+            }
         }
 
         .card {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            padding: 2rem;
-            border-radius: 24px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            padding: 2rem 1.5rem;
+            border-radius: 24px 24px 0 0; /* Rounded top only looks nice at bottom */
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
             text-align: center;
-            width: 90%;
-            max-width: 380px;
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-            z-index: 100;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.3);
+            color: white;
+            padding-bottom: 40px; /* Extra padding for phone bottom area */
         }
 
         h1 {
-            font-size: 1.8rem;
-            margin-bottom: 20px;
+            font-size: 1.6rem;
+            margin-bottom: 25px;
+            font-weight: 700;
             text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
 
         .btn-container {
-            margin-top: 20px;
-            height: 60px; /* Space for buttons */
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 15px;
+            gap: 20px;
+            height: 60px;
             position: relative;
+            margin-bottom: 15px;
         }
 
         button {
-            padding: 12px 30px;
+            padding: 14px 30px;
             border-radius: 50px;
             border: none;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: bold;
             cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
             transition: all 0.2s ease;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
 
         #yesBtn {
             background: #ff4d6d;
             color: white;
-            z-index: 10;
+            z-index: 100; /* Always on top */
+            position: relative;
         }
 
         #noBtn {
             background: #ffffff;
             color: #ff4d6d;
             position: absolute; /* Allows movement */
-            right: 20px; /* Start position */
+            right: 20px;
         }
-        
+
         .countdown {
-            margin-top: 20px;
-            font-size: 0.85rem;
-            opacity: 0.9;
-            background: rgba(0,0,0,0.3);
-            padding: 5px 10px;
-            border-radius: 10px;
-            display: inline-block;
+            font-size: 0.8rem;
+            opacity: 0.8;
+            margin-top: 10px;
+            letter-spacing: 0.5px;
         }
     </style>
 </head>
@@ -103,77 +112,66 @@
             <button id="noBtn">No</button>
         </div>
 
-        <div class="countdown" id="countdown">
-            Loading timer...
-        </div>
+        <div class="countdown" id="countdown">Loading...</div>
     </div>
 
     <script>
-        // --- CONFIGURATION: UPDATE THIS! ---
-        // Your Phone Number (Country Code + Number). No '+' sign.
-        // Example: Kenya is 254... 
-        const PHONE_NUMBER = "254798466318"; 
+        // --- YOUR CONFIGURATION ---
+        // Change this number! (Country Code + Number, no +)
+        const WHATSAPP_NUMBER = "254721405826"; 
 
         const yesBtn = document.getElementById('yesBtn');
         const noBtn = document.getElementById('noBtn');
         const question = document.getElementById('question');
-        
-        // State for button growth
         let yesScale = 1;
 
-        // 1. Move "No" Button & Grow "Yes" Button
-        function moveButton() {
-            // Get random position within the screen
+        // 1. Runaway "No" Logic
+        function moveNoButton() {
             const x = Math.random() * (window.innerWidth - 100);
-            const y = Math.random() * (window.innerHeight - 100);
-
-            noBtn.style.position = "fixed"; // Break out of the card layout
-            noBtn.style.left = x + "px";
-            noBtn.style.top = y + "px";
-
-            // Grow the YES button
-            yesScale += 0.4; // Grow by 40% each time
+            const y = Math.random() * (window.innerHeight - 200); // Keep it somewhat reachable
+            
+            noBtn.style.position = "fixed";
+            noBtn.style.left = `${Math.random() * 80}%`;
+            noBtn.style.top = `${Math.random() * 80}%`;
+            
+            // Make YES bigger
+            yesScale += 0.2;
             yesBtn.style.transform = `scale(${yesScale})`;
         }
 
-        // Trigger on hover (desktop) or touch (mobile)
-        noBtn.addEventListener('mouseover', moveButton);
+        // Trigger movement on any interaction
+        noBtn.addEventListener('click', moveNoButton);
+        noBtn.addEventListener('mouseover', moveNoButton);
         noBtn.addEventListener('touchstart', (e) => {
-            e.preventDefault(); // Stop the click from registering
-            moveButton();
+            e.preventDefault(); 
+            moveNoButton(); 
         });
-        noBtn.addEventListener('click', moveButton);
 
-        // 2. "Yes" Button Action
+        // 2. "Yes" Logic
         yesBtn.addEventListener('click', () => {
-            // Confetti Explosion
-            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-
-            question.innerText = "Yay! I knew you'd say yes! ❤️";
-            noBtn.style.display = "none"; // Hide No button
+            confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+            question.innerText = "Yay! I love you! ❤️";
+            noBtn.style.display = "none";
             document.getElementById("countdown").style.display = "none";
-            
-            // Redirect to WhatsApp after 1.5 seconds
+
             setTimeout(() => {
-                const message = "Hey! I just saw your site and... YES, I will be your Valentine! 🌹🥰";
-                const url = `https://wa.me/${PHONE_NUMBER}?text=${encodeURIComponent(message)}`;
-                window.location.href = url;
+                const text = "Hey! I saw your app and... YES! 🌹❤️";
+                window.location.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
             }, 1500);
         });
 
-        // 3. Countdown Timer
+        // 3. Simple Countdown
         const vDay = new Date(`February 14, ${new Date().getFullYear()} 00:00:00`).getTime();
         setInterval(() => {
             const now = new Date().getTime();
             const diff = vDay - now;
-            if (diff < 0) {
-                 document.getElementById("countdown").innerText = "Happy Valentine's Day!"; 
-                 return;
+            if (diff <= 0) {
+                document.getElementById("countdown").innerText = "Happy Valentine's Day!";
+                return;
             }
             const d = Math.floor(diff / (1000 * 60 * 60 * 24));
             const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            document.getElementById("countdown").innerText = `${d}d ${h}h ${m}m until Valentine's`;
+            document.getElementById("countdown").innerText = `${d}d ${h}h until Valentine's`;
         }, 1000);
     </script>
 </body>
