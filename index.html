@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>A Special Question ❤️</title>
+    <title>For You ❤️</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -13,165 +13,197 @@
             width: 100vw;
             display: flex;
             flex-direction: column;
-            justify-content: flex-end; /* Pushes content to bottom */
-            align-items: center;
-            font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #000; /* Black background looks best for photos */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             overflow: hidden;
-            
-            /* --- DEFAULT BACKGROUND (DESKTOP) --- */
-            background-color: #1a0b0f; /* Dark romantic fallback */
-            background-image: url('first-date.jpg');
-            background-position: center center;
-            background-repeat: no-repeat;
-            background-size: cover; /* Desktop: Fill the screen */
         }
 
-        /* --- MOBILE OPTIMIZATION --- */
-        @media (max-width: 768px) {
-            body {
-                /* On Mobile: Fit the image width exactly at the top */
-                background-size: 100% auto; 
-                background-position: top center;
-                /* Add a gradient so the photo fades into the dark background */
-                background-image: linear-gradient(to bottom, rgba(0,0,0,0) 60%, #1a0b0f 90%), url('first-date.jpg');
-            }
-        }
-
-        .card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            padding: 2rem 1.5rem;
-            border-radius: 24px 24px 0 0; /* Rounded top only looks nice at bottom */
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
-            text-align: center;
+        /* --- THE SLIDESHOW CONTAINER (Top 65% of screen) --- */
+        .slideshow-container {
+            position: relative;
             width: 100%;
-            max-width: 500px;
-            box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.3);
-            color: white;
-            padding-bottom: 40px; /* Extra padding for phone bottom area */
+            height: 65vh; 
+            overflow: hidden;
+            background: #000;
         }
 
-        h1 {
-            font-size: 1.6rem;
-            margin-bottom: 25px;
-            font-weight: 700;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+            
+            /* Ensures the whole photo is visible without cropping */
+            background-size: cover; 
+            background-position: center;
         }
 
-        .btn-container {
+        /* Makes the first slide visible initially */
+        .slide.active {
+            opacity: 1;
+        }
+
+        /* --- THE CARD AREA (Bottom 35% of screen) --- */
+        .card-area {
+            height: 35vh;
+            width: 100%;
+            background: linear-gradient(to bottom, #1a0b0f, #000);
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 20px;
-            height: 60px;
             position: relative;
-            margin-bottom: 15px;
+            z-index: 10;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .card-content {
+            text-align: center;
+            color: white;
+            width: 90%;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            line-height: 1.3;
+        }
+
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            position: relative;
+            height: 60px; /* Reserve space for buttons */
         }
 
         button {
-            padding: 14px 30px;
+            padding: 12px 30px;
             border-radius: 50px;
             border: none;
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: bold;
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            transition: all 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
         }
 
         #yesBtn {
             background: #ff4d6d;
             color: white;
-            z-index: 100; /* Always on top */
-            position: relative;
+            z-index: 100;
         }
 
         #noBtn {
-            background: #ffffff;
+            background: #fff;
             color: #ff4d6d;
-            position: absolute; /* Allows movement */
-            right: 20px;
+            position: absolute; /* Allows it to move freely */
+            right: 20px; 
         }
 
         .countdown {
+            margin-top: 15px;
             font-size: 0.8rem;
-            opacity: 0.8;
-            margin-top: 10px;
-            letter-spacing: 0.5px;
+            color: rgba(255,255,255,0.7);
         }
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <h1 id="question">Will you be my Valentine? 🌹</h1>
-        
-        <div class="btn-container">
-            <button id="yesBtn">YES</button>
-            <button id="noBtn">No</button>
-        </div>
+    <div class="slideshow-container">
+        <div class="slide active" style="background-image: url('1.jpg');"></div>
+        <div class="slide" style="background-image: url('2.jpg');"></div>
+        <div class="slide" style="background-image: url('3.jpg');"></div>
+        <div class="slide" style="background-image: url('4.jpg');"></div>
+        <div class="slide" style="background-image: url('5.jpg');"></div>
+    </div>
 
-        <div class="countdown" id="countdown">Loading...</div>
+    <div class="card-area">
+        <div class="card-content">
+            <h1 id="mainText">Will you be my Valentine? 🌹</h1>
+            
+            <div class="btn-group">
+                <button id="yesBtn">YES</button>
+                <button id="noBtn">No</button>
+            </div>
+
+            <div class="countdown" id="countdown">Loading timer...</div>
+        </div>
     </div>
 
     <script>
-        // --- YOUR CONFIGURATION ---
-        // Change this number! (Country Code + Number, no +)
-        const WHATSAPP_NUMBER = "254721405826"; 
+        // --- CONFIGURATION ---
+        const WHATSAPP_NUMBER = "254759937174"; // REPLACE THIS!
 
+        // --- 1. SLIDESHOW LOGIC ---
+        const slides = document.querySelectorAll('.slide');
+        let currentSlide = 0;
+
+        function nextSlide() {
+            // Remove active class from current
+            slides[currentSlide].classList.remove('active');
+            // Calculate next slide index (loop back to 0 if at end)
+            currentSlide = (currentSlide + 1) % slides.length;
+            // Add active class to new slide
+            slides[currentSlide].classList.add('active');
+        }
+
+        // Change photo every 3.5 seconds
+        setInterval(nextSlide, 3500);
+
+
+        // --- 2. BUTTON LOGIC ---
         const yesBtn = document.getElementById('yesBtn');
         const noBtn = document.getElementById('noBtn');
-        const question = document.getElementById('question');
+        const mainText = document.getElementById('mainText');
         let yesScale = 1;
 
-        // 1. Runaway "No" Logic
         function moveNoButton() {
+            // Move No button to random spot on screen
             const x = Math.random() * (window.innerWidth - 100);
-            const y = Math.random() * (window.innerHeight - 200); // Keep it somewhat reachable
+            const y = Math.random() * (window.innerHeight - 100);
             
-            noBtn.style.position = "fixed";
-            noBtn.style.left = `${Math.random() * 80}%`;
-            noBtn.style.top = `${Math.random() * 80}%`;
-            
-            // Make YES bigger
-            yesScale += 0.2;
+            noBtn.style.position = 'fixed'; // Break out of layout
+            noBtn.style.left = `${x}px`;
+            noBtn.style.top = `${y}px`;
+
+            // Make Yes button bigger
+            yesScale += 0.3;
             yesBtn.style.transform = `scale(${yesScale})`;
         }
 
-        // Trigger movement on any interaction
         noBtn.addEventListener('click', moveNoButton);
+        noBtn.addEventListener('touchstart', (e) => { e.preventDefault(); moveNoButton(); });
         noBtn.addEventListener('mouseover', moveNoButton);
-        noBtn.addEventListener('touchstart', (e) => {
-            e.preventDefault(); 
-            moveNoButton(); 
-        });
 
-        // 2. "Yes" Logic
         yesBtn.addEventListener('click', () => {
             confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
-            question.innerText = "Yay! I love you! ❤️";
-            noBtn.style.display = "none";
-            document.getElementById("countdown").style.display = "none";
+            mainText.innerHTML = "Yay! I love you! ❤️<br>See you soon!";
+            noBtn.style.display = 'none';
+            document.getElementById("countdown").style.display = 'none';
 
             setTimeout(() => {
-                const text = "Hey! I saw your app and... YES! 🌹❤️";
-                window.location.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
-            }, 1500);
+                const msg = "Hey! I saw the photos and... YES! I'll be your Valentine! 🌹";
+                window.location.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
+            }, 2000);
         });
 
-        // 3. Simple Countdown
+        // --- 3. COUNTDOWN ---
         const vDay = new Date(`February 14, ${new Date().getFullYear()} 00:00:00`).getTime();
         setInterval(() => {
             const now = new Date().getTime();
             const diff = vDay - now;
             if (diff <= 0) {
-                document.getElementById("countdown").innerText = "Happy Valentine's Day!";
-                return;
+                 document.getElementById("countdown").innerText = "Happy Valentine's Day!";
+                 return;
             }
             const d = Math.floor(diff / (1000 * 60 * 60 * 24));
             const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            document.getElementById("countdown").innerText = `${d}d ${h}h until Valentine's`;
+            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            document.getElementById("countdown").innerText = `${d}d ${h}h ${m}m until Valentine's`;
         }, 1000);
     </script>
 </body>
