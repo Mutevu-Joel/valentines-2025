@@ -13,7 +13,8 @@
             width: 100vw;
             display: flex;
             flex-direction: column;
-            background-color: #000; /* Black background looks best for photos */
+            /* Black background ensures letterboxing looks good */
+            background-color: #000; 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             overflow: hidden;
         }
@@ -24,9 +25,10 @@
             width: 100%;
             height: 65vh; 
             overflow: hidden;
-            background: #000;
+            background: #000; /* Ensures black bars for landscape photos */
         }
 
+        /* DEFAULT SLIDE STYLE (Best for Portrait/Square - Photos 3,4,5) */
         .slide {
             position: absolute;
             top: 0;
@@ -35,13 +37,19 @@
             height: 100%;
             opacity: 0;
             transition: opacity 1s ease-in-out;
-            
-            /* Ensures the whole photo is visible without cropping */
+            /* Default behavior: Fill space, crop if necessary */
             background-size: cover; 
             background-position: center;
         }
 
-        /* Makes the first slide visible initially */
+        /* *** NEW: SPECIAL STYLE FOR LANDSCAPE PHOTOS (1 & 2) *** */
+        /* This ensures the whole photo is visible without cropping */
+        .slide.landscape-fit {
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
         .slide.active {
             opacity: 1;
         }
@@ -50,7 +58,8 @@
         .card-area {
             height: 35vh;
             width: 100%;
-            background: linear-gradient(to bottom, #1a0b0f, #000);
+            /* A subtle gradient from the black photo area to the card area */
+            background: linear-gradient(to bottom, #000 0%, #1a0b0f 100%);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -77,7 +86,7 @@
             justify-content: center;
             gap: 20px;
             position: relative;
-            height: 60px; /* Reserve space for buttons */
+            height: 60px;
         }
 
         button {
@@ -100,7 +109,7 @@
         #noBtn {
             background: #fff;
             color: #ff4d6d;
-            position: absolute; /* Allows it to move freely */
+            position: absolute;
             right: 20px; 
         }
 
@@ -114,8 +123,8 @@
 <body>
 
     <div class="slideshow-container">
-        <div class="slide active" style="background-image: url('1.jpg');"></div>
-        <div class="slide" style="background-image: url('2.jpg');"></div>
+        <div class="slide landscape-fit active" style="background-image: url('1.jpg');"></div>
+        <div class="slide landscape-fit" style="background-image: url('2.jpg');"></div>
         <div class="slide" style="background-image: url('3.jpg');"></div>
         <div class="slide" style="background-image: url('4.jpg');"></div>
         <div class="slide" style="background-image: url('5.jpg');"></div>
@@ -136,24 +145,21 @@
 
     <script>
         // --- CONFIGURATION ---
-        const WHATSAPP_NUMBER = "254759937174"; // REPLACE THIS!
+        // Don't forget to update this again!
+        const WHATSAPP_NUMBER = "254700000000"; 
 
         // --- 1. SLIDESHOW LOGIC ---
         const slides = document.querySelectorAll('.slide');
         let currentSlide = 0;
 
         function nextSlide() {
-            // Remove active class from current
             slides[currentSlide].classList.remove('active');
-            // Calculate next slide index (loop back to 0 if at end)
             currentSlide = (currentSlide + 1) % slides.length;
-            // Add active class to new slide
             slides[currentSlide].classList.add('active');
         }
 
         // Change photo every 3.5 seconds
         setInterval(nextSlide, 3500);
-
 
         // --- 2. BUTTON LOGIC ---
         const yesBtn = document.getElementById('yesBtn');
@@ -162,11 +168,14 @@
         let yesScale = 1;
 
         function moveNoButton() {
-            // Move No button to random spot on screen
-            const x = Math.random() * (window.innerWidth - 100);
-            const y = Math.random() * (window.innerHeight - 100);
+            // Prevent button from getting stuck off-screen on mobile
+            const maxX = window.innerWidth - noBtn.offsetWidth - 20;
+            const maxY = window.innerHeight - noBtn.offsetHeight - 20;
             
-            noBtn.style.position = 'fixed'; // Break out of layout
+            const x = Math.random() * maxX;
+            const y = Math.random() * maxY;
+            
+            noBtn.style.position = 'fixed';
             noBtn.style.left = `${x}px`;
             noBtn.style.top = `${y}px`;
 
@@ -186,7 +195,7 @@
             document.getElementById("countdown").style.display = 'none';
 
             setTimeout(() => {
-                const msg = "Hey! I saw the photos and... YES! I'll be your Valentine! 🌹";
+                const msg = "YES! I'll be your Valentine! 🌹❤️";
                 window.location.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
             }, 2000);
         });
